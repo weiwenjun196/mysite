@@ -41,6 +41,11 @@ img:hover{
   box-shadow:0 8px 20px rgba(0,0,0,0.35);
 }
 
+img:active{
+  transform:scale(0.95);
+  box-shadow:0 8px 20px rgba(0,0,0,0.20);
+}
+
 h1{
   opacity:0;
   animation:fadeUp 0.8s ease forwards;
@@ -74,7 +79,9 @@ h1{
 <body>
 
 <div class="card">
-  <img src="avatar.jpg" alt="avatar">
+  <a href="about.html">
+    <img src="avatar.jpg" alt="avatar">
+  </a>
   <h1>Hi I'm Weiwenjun</h1>
 </div>
 
