@@ -17,6 +17,10 @@ body{
   text-align:center;
 }
 
+div{
+  animation:fadeUp 1s ease-out;
+}
+
 img{
   width:120px;
   height:120px;
@@ -31,6 +35,18 @@ img{
 img:hover{
   transform:scale(1.1);
   box-shadow:0 8px 20px rgba(0,0,0,0.35);
+}
+
+
+@keyframes fadeUp{
+  from{
+    opacity:0;
+    transform:translateY(20px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
 }
 
 </style>
