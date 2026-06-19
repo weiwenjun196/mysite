@@ -18,7 +18,9 @@ body{
 }
 
 div{
-  animation:fadeUp 1s ease-out;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
 }
 
 img{
@@ -30,6 +32,9 @@ img{
   box-shadow:0 4px 12px rgba(0,0,0,0.25);
   transition:transform 0.3s ease,
              box-shadow 0.3s ease;
+
+  opacity:0;
+  animation:fadeIn 1s ease forwards;
 }
 
 img:hover{
@@ -37,6 +42,20 @@ img:hover{
   box-shadow:0 8px 20px rgba(0,0,0,0.35);
 }
 
+h1{
+  opacity:0;
+  animation:fadeUp 0.8s ease forwards;
+  animation-delay:0.2s;
+}
+
+@keyframes fadeIn{
+  from{
+    opacity:0;
+  }
+  to{
+    opacity:1;
+  }
+}
 
 @keyframes fadeUp{
   from{
@@ -48,7 +67,6 @@ img:hover{
     transform:translateY(0);
   }
 }
-
 </style>
 </head>
 
