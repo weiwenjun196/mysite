@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Leave me a message - weiwenjun</title>
+<style>
+html, body{
+  margin:0;
+  height:100vh;
+  overflow:hidden;
+  font-family:Arial, sans-serif;
+}
+body{
+  background:linear-gradient(135deg, #90caf8 0%, #64b5f6 100%);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+.container{
+  width:100%;
+  max-width:500px;
+  padding:40px 20px;
+  box-sizing:border-box;
+}
+.message-card{
+  background:white;
+  border-radius:12px;
+  padding:40px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.1);
+  animation:slideUp 0.6s ease;
+}
+.header{
+  text-align:center;
+  margin-bottom:30px;
+}
+.header h1{
+  color:#1976d2;
+  margin:0 0 10px 0;
+  font-size:28px;
+}
+.header p{
+  color:#666;
+  margin:0;
+  font-size:14px;
+}
+.form-group{
+  margin-bottom:20px;
+}
+.form-group label{
+  display:block;
+  color:#333;
+  font-weight:bold;
+  margin-bottom:8px;
+  font-size:14px;
+}
+.form-group input,
+.form-group textarea{
+  width:100%;
+  padding:12px;
+  border:2px solid #e0e0e0;
+  border-radius:6px;
+  font-family:Arial, sans-serif;
+  font-size:14px;
+  box-sizing:border-box;
+  transition:border-color 0.3s;
+}
+.form-group input:focus,
+.form-group textarea:focus{
+  outline:none;
+  border-color:#90caf8;
+}
+.form-group textarea{
+  resize:vertical;
+  min-height:120px;
+}
+.char-count{
+  font-size:12px;
+  color:#999;
+  margin-top:5px;
+}
+.button-group{
+  display:flex;
+  gap:12px;
+  margin-top:30px;
+}
+.btn{
+  flex:1;
+  padding:14px;
+  border:none;
+  border-radius:6px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+  transition:all 0.3s;
+}
+.btn-submit{
+  background:#90caf8;
+  color:white;
+}
+.btn-submit:hover{
+  background:#64b5f6;
+  transform:translateY(-2px);
+  box-shadow:0 4px 12px rgba(144,202,248,0.4);
+}
+.btn-submit:active{
+  transform:translateY(0);
+}
+.btn-submit:disabled{
+  opacity:0.6;
+  cursor:not-allowed;
+  transform:none;
+}
+.btn-cancel{
+  background:#f5f5f5;
+  color:#333;
+}
+.btn-cancel:hover{
+  background:#e0e0e0;
+}
+.error-msg{
+  color:#e53935;
+  font-size:13px;
+  margin-top:5px;
+  min-height:18px;
+}
+.success-msg{
+  color:#43a047;
+  font-size:13px;
+  margin-top:5px;
+}
+.loading{
+  display:none;
+  text-align:center;
+  padding:20px;
+}
+.spinner{
+  border:3px solid #f3f3f3;
+  border-top:3px solid #90caf8;
+  border-radius:50%;
+  width:30px;
+  height:30px;
+  animation:spin 1s linear infinite;
+  margin:0 auto;
+}
+@keyframes spin{
+  0%{transform:rotate(0deg);}
+  100%{transform:rotate(360deg);}
+}
+@keyframes slideUp{
+  from{
+    opacity:0;
+    transform:translateY(30px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+.info-box{
+  background:#e3f2fd;
+  border-left:4px solid #90caf8;
+  padding:12px;
+  border-radius:4px;
+  font-size:12px;
+  color:#1565c0;
+  margin-bottom:20px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="message-card">
+    <div class="header">
+      <h1>💬 Leave me a message</h1>
+      <p>给我留言，我会尽快回复</p>
+    </div>
+
+    <div class="info-box">
+      ℹ️ 你的留言将被保存到我的仓库，我会及时查看并回复
+    </div>
+
+    <form id="messageForm">
+      <div class="form-group">
+        <label for="name">昵称 *</label>
+        <input 
+          type="text" 
+          id="name" 
+          name="name" 
+          placeholder="请输入你的昵称" 
+          required
+          maxlength="50"
+        >
+        <div class="error-msg" id="nameError"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">邮箱 *</label>
+        <input 
+          type="email" 
+          id="email" 
+          name="email" 
+          placeholder="请输入你的邮箱" 
+          required
+          maxlength="100"
+        >
+        <div class="error-msg" id="emailError"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="message">留言内容 *</label>
+        <textarea 
+          id="message" 
+          name="message" 
+          placeholder="请输入你的留言..." 
+          required
+          maxlength="1000"
+        ></textarea>
+        <div class="char-count">
+          <span id="charCount">0</span>/1000
+        </div>
+        <div class="error-msg" id="messageError"></div>
+      </div>
+
+      <div class="button-group">
+        <button type="button" class="btn btn-cancel" onclick="window.history.back()">返回</button>
+        <button type="submit" class="btn btn-submit" id="submitBtn">提交</button>
+      </div>
+
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>提交中...</p>
+      </div>
+
+      <div class="success-msg" id="successMsg"></div>
+      <div class="error-msg" id="formError"></div>
+    </form>
+  </div>
+</div>
+
+<script>
+const form = document.getElementById('messageForm');
+const submitBtn = document.getElementById('submitBtn');
+const loading = document.getElementById('loading');
+const nameInput = document.getElementById('name');
+const emailInput = document.getElementById('email');
+const messageInput = document.getElementById('message');
+const charCount = document.getElementById('charCount');
+
+// 更新字数统计
+messageInput.addEventListener('input', () => {
+  charCount.textContent = messageInput.value.length;
+});
+
+// 表单验证
+function validateForm() {
+  let isValid = true;
+  
+  document.getElementById('nameError').textContent = '';
+  document.getElementById('emailError').textContent = '';
+  document.getElementById('messageError').textContent = '';
+  document.getElementById('formError').textContent = '';
+
+  const name = nameInput.value.trim();
+  const email = emailInput.value.trim();
+  const message = messageInput.value.trim();
+
+  if (!name) {
+    document.getElementById('nameError').textContent = '请输入昵称';
+    isValid = false;
+  } else if (name.length < 2) {
+    document.getElementById('nameError').textContent = '昵称至少需要2个字符';
+    isValid = false;
+  }
+
+  if (!email) {
+    document.getElementById('emailError').textContent = '请输入邮箱';
+    isValid = false;
+  } else if (!isValidEmail(email)) {
+    document.getElementById('emailError').textContent = '邮箱格式不正确';
+    isValid = false;
+  }
+
+  if (!message) {
+    document.getElementById('messageError').textContent = '请输入留言内容';
+    isValid = false;
+  } else if (message.length < 5) {
+    document.getElementById('messageError').textContent = '留言至少需要5个字符';
+    isValid = false;
+  }
+
+  return isValid;
+}
+
+function isValidEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+// 提交表单
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  if (!validateForm()) {
+    return;
+  }
+
+  const name = nameInput.value.trim();
+  const email = emailInput.value.trim();
+  const message = messageInput.value.trim();
+
+  submitBtn.disabled = true;
+  loading.style.display = 'block';
+
+  try {
+    const response = await fetch('/.netlify/functions/create-issue', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: name,
+        email: email,
+        message: message
+      })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      document.getElementById('successMsg').textContent = '✅ 留言提交成功！感谢你的留言，我会尽快回复。';
+      form.reset();
+      charCount.textContent = '0';
+      setTimeout(() => {
+        window.history.back();
+      }, 2000);
+    } else {
+      throw new Error(data.error || '提交失败');
+    }
+  } catch (error) {
+    document.getElementById('formError').textContent = '❌ ' + (error.message || '提交失败，请稍后重试');
+  } finally {
+    submitBtn.disabled = false;
+    loading.style.display = 'none';
+  }
+});
+</script>
+
+</body>
+</html>
