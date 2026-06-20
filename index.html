@@ -109,6 +109,48 @@ h1{
   box-shadow:0 4px 12px rgba(0,0,0,0.15);
 }
 
+.next-content{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:40px;
+}
+
+.chat-btn{
+  display:inline-block;
+  color:white;
+  background-color:#c1defb;
+  padding:16px 42px;
+  font-size:20px;
+  font-weight:bold;
+  text-decoration:none;
+  border-radius:50px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.20);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+  opacity:0;
+  animation:fadeUp 0.8s ease forwards;
+  animation-delay:0.3s;
+}
+
+.chat-btn:hover{
+  transform:scale(1.05);
+  box-shadow:0 8px 20px rgba(0,0,0,0.30);
+}
+
+.chat-btn:active{
+  transform:scale(0.95);
+  box-shadow:0 4px 12px rgba(0,0,0,0.15);
+}
+
+.next-title{
+  opacity:0;
+  animation:fadeUp 0.8s ease forwards;
+  animation-delay:0.1s;
+}
+
 @keyframes fadeButton{
   from{
     opacity:0;
@@ -215,8 +257,10 @@ h1{
 </div>
 
 <div class="section next" id="next-section">
-  <a href="chat/login.html">聊天室</a>
-  <h1>其他功能开发中...</h1>
+  <div class="next-content">
+    <h1 class="next-title">其他功能开发中...</h1>
+    <a href="chat/login.html" class="chat-btn">进入聊天室</a>
+  </div>
 </div>
 
 <script>
