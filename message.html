@@ -242,103 +242,64 @@ body{
 const form = document.getElementById('messageForm');
 const submitBtn = document.getElementById('submitBtn');
 const loading = document.getElementById('loading');
+
 const nameInput = document.getElementById('name');
 const emailInput = document.getElementById('email');
 const messageInput = document.getElementById('message');
 const charCount = document.getElementById('charCount');
 
-// 更新字数统计
 messageInput.addEventListener('input', () => {
   charCount.textContent = messageInput.value.length;
 });
 
-// 表单验证
-function validateForm() {
-  let isValid = true;
-  
-  document.getElementById('nameError').textContent = '';
-  document.getElementById('emailError').textContent = '';
-  document.getElementById('messageError').textContent = '';
-  document.getElementById('formError').textContent = '';
-
-  const name = nameInput.value.trim();
-  const email = emailInput.value.trim();
-  const message = messageInput.value.trim();
-
-  if (!name) {
-    document.getElementById('nameError').textContent = '请输入昵称';
-    isValid = false;
-  } else if (name.length < 2) {
-    document.getElementById('nameError').textContent = '昵称至少需要2个字符';
-    isValid = false;
-  }
-
-  if (!email) {
-    document.getElementById('emailError').textContent = '请输入邮箱';
-    isValid = false;
-  } else if (!isValidEmail(email)) {
-    document.getElementById('emailError').textContent = '邮箱格式不正确';
-    isValid = false;
-  }
-
-  if (!message) {
-    document.getElementById('messageError').textContent = '请输入留言内容';
-    isValid = false;
-  } else if (message.length < 5) {
-    document.getElementById('messageError').textContent = '留言至少需要5个字符';
-    isValid = false;
-  }
-
-  return isValid;
-}
-
-function isValidEmail(email) {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-}
-
-// 提交表单
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  if (!validateForm()) {
-    return;
-  }
-
   const name = nameInput.value.trim();
   const email = emailInput.value.trim();
   const message = messageInput.value.trim();
+
+  if (!name || !email || !message) {
+    alert('请填写完整信息');
+    return;
+  }
 
   submitBtn.disabled = true;
   loading.style.display = 'block';
 
   try {
-    const response = await fetch('/.netlify/functions/create-issue', {
+    const res = await fetch('https://keen-kashata-cefeab.netlify.app/.netlify/functions/create-issue', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        name: name,
-        email: email,
-        message: message
-      })
+      body: JSON.stringify({ name, email, message })
     });
 
-    const data = await response.json();
+    const text = await res.text();
+    let data;
 
-    if (response.ok) {
-      document.getElementById('successMsg').textContent = '✅ 留言提交成功！感谢你的留言，我会尽快回复。';
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = { error: text };
+    }
+
+    if (res.ok) {
+      alert('✅ 留言提交成功！');
       form.reset();
       charCount.textContent = '0';
+
       setTimeout(() => {
         window.history.back();
-      }, 2000);
+      }, 1500);
+
     } else {
       throw new Error(data.error || '提交失败');
     }
-  } catch (error) {
-    document.getElementById('formError').textContent = '❌ ' + (error.message || '提交失败，请稍后重试');
+
+  } catch (err) {
+    alert('❌ ' + err.message);
   } finally {
     submitBtn.disabled = false;
     loading.style.display = 'none';
