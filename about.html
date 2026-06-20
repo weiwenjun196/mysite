@@ -10,30 +10,32 @@ html, body{
   padding: 0;
   height: 100%;
   font-family: Arial, sans-serif;
+  overflow: hidden;
 }
 
 body{
-  background: url("background.png") no-repeat center center fixed;
+  background: url("background.png") no-repeat center center;
   background-size: cover;
-  color: #fff;
+}
+
+body{
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .container{
   width: 800px;
   max-width: 90%;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
 
-  background: rgba(0,0,0,0.55);
+  background: rgba(0,0,0,0.6);
   padding: 30px;
   border-radius: 15px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.4);
 
   color: #fff;
 
-  animation: fadeIn 1s ease-out forwards;
+  animation: fadeIn 0.8s ease-out forwards;
 }
 
 h1{
@@ -49,6 +51,9 @@ h1{
 }
 
 .section{
+  margin-bottom: 20px;
+  line-height: 1.6;
+
   opacity: 0;
   animation: fadeUp .8s forwards;
 }
@@ -57,22 +62,6 @@ h1{
 .section:nth-of-type(2){ animation-delay: .6s; }
 .section:nth-of-type(3){ animation-delay: .8s; }
 .section:nth-of-type(4){ animation-delay: 1s; }
-
-@keyframes fadeUp{
-  from{
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to{
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.section{
-  margin-bottom: 20px;
-  line-height: 1.6;
-}
 
 h2{
   border-left: 4px solid #4fc3f7;
@@ -92,14 +81,24 @@ a:hover{
 @keyframes fadeIn{
   from{
     opacity: 0;
-    transform: translate(-50%, -45%);
+    transform: scale(0.98);
   }
   to{
     opacity: 1;
-    transform: translate(-50%, -50%);
+    transform: scale(1);
   }
 }
 
+@keyframes fadeUp{
+  from{
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to{
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 </style>
 
 </head>
@@ -124,7 +123,7 @@ a:hover{
 
   <div class="section">
     <h2>自我介绍</h2>
-     emm 没什么想说的<br>
+    emm 没什么想说的<br>
   </div>
 
   <div class="section">
