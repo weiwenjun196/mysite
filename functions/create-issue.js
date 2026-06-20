@@ -16,7 +16,6 @@ exports.handler = async (event) => {
     };
   }
 
-  // ❌ 只允许 POST
   if (event.httpMethod !== "POST") {
     return {
       statusCode: 405,
