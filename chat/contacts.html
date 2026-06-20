@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>选择聊天对象</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100vh; }
+  body {
+    font-family: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(135deg,#90caf8,#64b5f6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+  }
+  .app {
+    width: 100%;
+    max-width: 480px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 85vh;
+  }
+  .header {
+    background: #64b5f6;
+    color: white;
+    padding: 14px 16px;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .header .status { font-size: 12px; opacity: 0.85; font-weight: normal; }
+  .logout-btn {
+    background: rgba(255,255,255,0.25);
+    border: none;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+  .logout-btn:hover { background: rgba(255,255,255,0.4); }
+  .contact-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+  }
+  .contact-item {
+    display: flex;
+    align-items: center;
+    padding: 14px 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+    gap: 12px;
+  }
+  .contact-item:hover { background: #f5f9ff; }
+  .contact-item:active { background: #e8f1ff; }
+  .avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #64b5f6;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .contact-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .contact-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #222;
+  }
+  .contact-preview {
+    font-size: 13px;
+    color: #999;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 240px;
+  }
+  .unread-badge {
+    min-width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    background: #e53935;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 6px;
+    flex-shrink: 0;
+  }
+  .loading-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #888;
+    font-size: 14px;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="header">
+    <span>选择聊天对象</span>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <span class="status" id="statusText"></span>
+      <button class="logout-btn" onclick="logout()">退出</button>
+    </div>
+  </div>
+  <div id="loadingScreen" class="loading-screen">加载中...</div>
+  <div class="contact-list" id="contactList" style="display:none;"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+
+<script>
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.database();
+
+  const loadingScreen = document.getElementById('loadingScreen');
+  const contactList = document.getElementById('contactList');
+  const statusText = document.getElementById('statusText');
+
+  let myUsername = '';
+
+  function getRoomId(userA, userB) {
+    return [userA, userB].sort().join('_');
+  }
+
+  auth.onAuthStateChanged((user) => {
+    if (!user) {
+      window.location.href = "login.html";
+      return;
+    }
+
+    myUsername = user.email.split('@')[0];
+
+    if (!ALL_USERS.includes(myUsername)) {
+      loadingScreen.textContent = "当前账号未配置聊天权限";
+      return;
+    }
+
+    statusText.textContent = `我是 ${myUsername}`;
+
+    const otherUsers = ALL_USERS.filter((name) => name !== myUsername);
+    renderContactList(otherUsers);
+
+    loadingScreen.style.display = 'none';
+    contactList.style.display = 'block';
+  });
+
+  function logout() {
+    auth.signOut().then(() => {
+      window.location.href = "login.html";
+    });
+  }
+
+  function renderContactList(otherUsers) {
+    contactList.innerHTML = '';
+
+    otherUsers.forEach((otherName) => {
+      const roomId = getRoomId(myUsername, otherName);
+
+      const item = document.createElement('div');
+      item.className = 'contact-item';
+      item.addEventListener('click', () => {
+        window.location.href = `chat.html?with=${encodeURIComponent(otherName)}`;
+      });
+
+      const avatar = document.createElement('div');
+      avatar.className = 'avatar';
+      avatar.textContent = otherName.charAt(0).toUpperCase();
+
+      const info = document.createElement('div');
+      info.className = 'contact-info';
+
+      const name = document.createElement('div');
+      name.className = 'contact-name';
+      name.textContent = otherName;
+
+      const preview = document.createElement('div');
+      preview.className = 'contact-preview';
+      preview.textContent = '加载中...';
+
+      info.appendChild(name);
+      info.appendChild(preview);
+
+      const badge = document.createElement('div');
+      badge.className = 'unread-badge';
+      badge.style.display = 'none';
+
+      item.appendChild(avatar);
+      item.appendChild(info);
+      item.appendChild(badge);
+      contactList.appendChild(item);
+
+      listenForUnreadAndPreview(roomId, otherName, preview, badge);
+    });
+  }
+
+  // 监听某个聊天室的消息变化，更新预览文字和未读数量徽章
+  function listenForUnreadAndPreview(roomId, otherName, previewEl, badgeEl) {
+    const messagesRef = db.ref(`chats/${roomId}/messages`).limitToLast(50);
+    const lastReadRef = db.ref(`chats/${roomId}/lastRead/${myUsername}`);
+
+    let lastReadTime = 0;
+    const messagesCache = new Map(); // messageId -> 消息内容
+
+    function recompute() {
+      const allMessages = Array.from(messagesCache.values());
+
+      if (allMessages.length === 0) {
+        previewEl.textContent = '暂无消息，点击开始聊天';
+        badgeEl.style.display = 'none';
+        return;
+      }
+
+      const sorted = allMessages.sort((a, b) => (a.time || 0) - (b.time || 0));
+      const latest = sorted[sorted.length - 1];
+
+      if (latest.recalled) {
+        previewEl.textContent = latest.from === myUsername ? '你撤回了一条消息' : `${latest.from} 撤回了一条消息`;
+      } else {
+        previewEl.textContent = (latest.from === myUsername ? '我: ' : '') + latest.text;
+      }
+
+      const unreadCount = sorted.filter((m) =>
+        m.from !== myUsername && !m.recalled && (m.time || 0) > lastReadTime
+      ).length;
+
+      if (unreadCount > 0) {
+        badgeEl.textContent = unreadCount > 99 ? '99+' : String(unreadCount);
+        badgeEl.style.display = 'flex';
+      } else {
+        badgeEl.style.display = 'none';
+      }
+    }
+
+    lastReadRef.once('value', (snapshot) => {
+      lastReadTime = snapshot.val() || 0;
+
+      messagesRef.on('child_added', (snapshot) => {
+        messagesCache.set(snapshot.key, snapshot.val());
+        recompute();
+      });
+
+      messagesRef.on('child_changed', (snapshot) => {
+        messagesCache.set(snapshot.key, snapshot.val());
+        recompute();
+      });
+    });
+  }
+</script>
+</body>
+</html>
