@@ -165,7 +165,7 @@
       return;
     }
 
-    statusText.textContent = `我是 ${myUsername}`;
+    statusText.textContent = `${myUsername}`;
 
     const otherUsers = ALL_USERS.filter((name) => name !== myUsername);
     renderContactList(otherUsers);
