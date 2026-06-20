@@ -1,1 +1,158 @@
-<h1>Chat with me</h1>
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>Chat</title>
+<style>
+body{
+  margin:0;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  font-family:Arial;
+  background:#ededed;
+}
+
+/* 顶部栏 */
+.header{
+  height:50px;
+  background:#07c160;
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+}
+
+/* 聊天区域 */
+.chat-box{
+  flex:1;
+  padding:10px;
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+}
+
+/* 气泡基础 */
+.msg{
+  max-width:70%;
+  padding:10px 12px;
+  margin:6px 0;
+  border-radius:12px;
+  font-size:14px;
+  line-height:1.4;
+  animation:pop 0.2s ease;
+}
+
+/* 自己（右侧） */
+.me{
+  align-self:flex-end;
+  background:#95ec69;
+  border-bottom-right-radius:4px;
+}
+
+/* 对方（左侧） */
+.other{
+  align-self:flex-start;
+  background:white;
+  border-bottom-left-radius:4px;
+}
+
+/* 输入区 */
+.input-box{
+  display:flex;
+  padding:10px;
+  background:#f7f7f7;
+  border-top:1px solid #ddd;
+}
+
+input{
+  flex:1;
+  padding:10px;
+  border:none;
+  border-radius:20px;
+  outline:none;
+}
+
+button{
+  margin-left:8px;
+  padding:10px 16px;
+  border:none;
+  border-radius:20px;
+  background:#07c160;
+  color:white;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+button:active{
+  transform:scale(0.95);
+}
+
+/* 发送动画 */
+@keyframes pop{
+  from{
+    transform:scale(0.9);
+    opacity:0;
+  }
+  to{
+    transform:scale(1);
+    opacity:1;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">Weiwenjun Chat</div>
+
+<div class="chat-box" id="chatBox">
+  <div class="msg other">你好 👋</div>
+</div>
+
+<div class="input-box">
+  <input id="text" placeholder="输入消息..." onkeydown="keySend(event)">
+  <button onclick="send()">发送</button>
+</div>
+
+<script>
+const chatBox = document.getElementById('chatBox');
+
+function send(){
+  const input = document.getElementById('text');
+  const text = input.value.trim();
+
+  if(!text) return;
+
+  // 自己的消息
+  const myMsg = document.createElement('div');
+  myMsg.className = 'msg me';
+  myMsg.innerText = text;
+  chatBox.appendChild(myMsg);
+
+  input.value = '';
+
+  // 自动滚动到底部
+  chatBox.scrollTop = chatBox.scrollHeight;
+
+  // 模拟“对方回复”
+  setTimeout(()=>{
+    const reply = document.createElement('div');
+    reply.className = 'msg other';
+    reply.innerText = "收到：" + text;
+    chatBox.appendChild(reply);
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }, 500);
+}
+
+function keySend(e){
+  if(e.key === "Enter"){
+    send();
+  }
+}
+</script>
+
+</body>
+</html>
