@@ -54,19 +54,66 @@
     flex-direction: column;
     gap: 10px;
   }
-  .msg-row { display: flex; flex-direction: column; max-width: 75%; }
+  .msg-row { display: flex; flex-direction: column; max-width: 75%; position: relative; }
   .msg-row.mine { align-self: flex-end; align-items: flex-end; }
   .msg-row.theirs { align-self: flex-start; align-items: flex-start; }
   .msg-name { font-size: 12px; color: #888; margin-bottom: 2px; padding: 0 4px; }
+
+  .bubble-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .msg-row.mine .bubble-wrap { flex-direction: row; }
+  .msg-row.theirs .bubble-wrap { flex-direction: row-reverse; }
+
   .bubble {
     padding: 8px 12px;
     border-radius: 14px;
     font-size: 14px;
     line-height: 1.4;
     word-break: break-word;
+    user-select: none;
+    -webkit-user-select: none;
   }
   .mine .bubble { background: #64b5f6; color: white; border-bottom-right-radius: 4px; }
   .theirs .bubble { background: #f0f0f0; color: #222; border-bottom-left-radius: 4px; }
+
+  .bubble.pressed { filter: brightness(0.92); }
+
+  .recalled-msg {
+    font-size: 13px;
+    color: #999;
+    font-style: italic;
+    padding: 6px 4px;
+  }
+
+  .context-menu {
+    position: fixed;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.18);
+    padding: 6px;
+    z-index: 1000;
+    display: none;
+    min-width: 110px;
+  }
+  .context-menu.active { display: block; }
+  .context-menu button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    padding: 10px 14px;
+    font-size: 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #333;
+  }
+  .context-menu button:hover { background: #f5f5f5; }
+  .context-menu button.danger { color: #e53935; }
+
   .input-bar {
     display: flex;
     padding: 12px;
@@ -119,7 +166,10 @@
   </div>
 </div>
 
-<!-- Firebase SDK -->
+<div class="context-menu" id="contextMenu">
+  <button class="danger" id="recallMenuItem">撤回</button>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -130,10 +180,9 @@
   const auth = firebase.auth();
   const db = firebase.database();
 
-  // ===== 这里定义固定的两个聊天用户 =====
-  // 把邮箱前缀（@ 之前的部分）作为显示名。需要和你在 Firebase
-  // 控制台创建账号时使用的邮箱对应。
-  const CHAT_PAIR = ["bob", "admin"]; // 按需改成你实际创建的两个用户名
+  const CHAT_PAIR = ["bob", "admin"];
+
+  const RECALL_TIME_LIMIT_MS = 2 * 60 * 1000;
 
   const messagesEl = document.getElementById('messages');
   const msgInput = document.getElementById('msgInput');
@@ -142,20 +191,25 @@
   const inputBar = document.getElementById('inputBar');
   const headerTitle = document.getElementById('headerTitle');
   const statusText = document.getElementById('statusText');
+  const contextMenu = document.getElementById('contextMenu');
+  const recallMenuItem = document.getElementById('recallMenuItem');
 
   let myUsername = '';
   let otherUsername = '';
   let chatRoomId = '';
+  let activeMessageId = null;
 
-  // 检查登录状态
+  let longPressTimer = null;
+  const LONG_PRESS_DURATION = 450;
+
+  const messageRowMap = new Map();
+
   auth.onAuthStateChanged((user) => {
     if (!user) {
-      // 未登录，踢回登录页
       window.location.href = "login.html";
       return;
     }
 
-    // 从邮箱里提取用户名（去掉 @域名 部分）
     myUsername = user.email.split('@')[0];
 
     if (!CHAT_PAIR.includes(myUsername)) {
@@ -167,7 +221,6 @@
     headerTitle.textContent = `与 ${otherUsername} 聊天中`;
     statusText.textContent = `我是 ${myUsername}`;
 
-    // 生成两人共用、且唯一的聊天室ID（按字母排序拼接，确保双方算出来的ID一致）
     chatRoomId = CHAT_PAIR.slice().sort().join('_');
 
     loadingScreen.style.display = 'none';
@@ -190,6 +243,7 @@
     db.ref(`chats/${chatRoomId}/messages`).push({
       from: myUsername,
       text: text,
+      recalled: false,
       time: firebase.database.ServerValue.TIMESTAMP
     });
     msgInput.value = '';
@@ -198,28 +252,148 @@
   msgInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage(); });
 
   function listenForMessages() {
-    db.ref(`chats/${chatRoomId}/messages`).limitToLast(100).on('child_added', (snapshot) => {
-      renderMessage(snapshot.val());
+    const messagesRef = db.ref(`chats/${chatRoomId}/messages`).limitToLast(100);
+
+    messagesRef.on('child_added', (snapshot) => {
+      renderMessage(snapshot.key, snapshot.val());
+    });
+
+    messagesRef.on('child_changed', (snapshot) => {
+      updateMessageRow(snapshot.key, snapshot.val());
     });
   }
 
-  function renderMessage(msg) {
+  function recallMessage(messageId) {
+    if (!confirm('确定要撤回这条消息吗？')) return;
+    db.ref(`chats/${chatRoomId}/messages/${messageId}`).update({
+      recalled: true,
+      text: ''
+    });
+  }
+
+  function renderMessage(messageId, msg) {
     const row = document.createElement('div');
     const isMine = msg.from === myUsername;
     row.className = 'msg-row ' + (isMine ? 'mine' : 'theirs');
+    row.dataset.messageId = messageId;
+
+    messageRowMap.set(messageId, row);
+
+    if (msg.recalled) {
+      renderRecalledContent(row, msg, isMine);
+    } else {
+      renderNormalContent(row, messageId, msg, isMine);
+    }
+
+    messagesEl.appendChild(row);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function renderNormalContent(row, messageId, msg, isMine) {
+    row.innerHTML = '';
 
     const name = document.createElement('div');
     name.className = 'msg-name';
     name.textContent = isMine ? '我' : msg.from;
+    row.appendChild(name);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'bubble-wrap';
 
     const bubble = document.createElement('div');
     bubble.className = 'bubble';
     bubble.textContent = msg.text;
+    wrap.appendChild(bubble);
+    row.appendChild(wrap);
 
-    row.appendChild(name);
-    row.appendChild(bubble);
-    messagesEl.appendChild(row);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
+    if (isMine) {
+      const withinTimeLimit = RECALL_TIME_LIMIT_MS === 0 ||
+        (Date.now() - (msg.time || 0)) < RECALL_TIME_LIMIT_MS;
+
+      if (withinTimeLimit) {
+        bindContextMenuEvents(bubble, messageId);
+      }
+    }
+  }
+
+  function bindContextMenuEvents(bubble, messageId) {
+    bubble.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      openContextMenu(e.clientX, e.clientY, messageId);
+    });
+
+    bubble.addEventListener('touchstart', (e) => {
+      bubble.classList.add('pressed');
+      const touch = e.touches[0];
+      longPressTimer = setTimeout(() => {
+        openContextMenu(touch.clientX, touch.clientY, messageId);
+        bubble.classList.remove('pressed');
+      }, LONG_PRESS_DURATION);
+    }, { passive: true });
+
+    bubble.addEventListener('touchmove', () => {
+      clearTimeout(longPressTimer);
+      bubble.classList.remove('pressed');
+    }, { passive: true });
+
+    bubble.addEventListener('touchend', () => {
+      clearTimeout(longPressTimer);
+      bubble.classList.remove('pressed');
+    });
+  }
+
+  function openContextMenu(x, y, messageId) {
+    activeMessageId = messageId;
+    contextMenu.classList.add('active');
+
+    const menuRect = contextMenu.getBoundingClientRect();
+    const maxX = window.innerWidth - menuRect.width - 8;
+    const maxY = window.innerHeight - menuRect.height - 8;
+
+    contextMenu.style.left = Math.min(x, maxX) + 'px';
+    contextMenu.style.top = Math.min(y, maxY) + 'px';
+  }
+
+  function closeContextMenu() {
+    contextMenu.classList.remove('active');
+    activeMessageId = null;
+  }
+
+  recallMenuItem.addEventListener('click', () => {
+    if (activeMessageId) {
+      recallMessage(activeMessageId);
+    }
+    closeContextMenu();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (contextMenu.classList.contains('active') && !contextMenu.contains(e.target)) {
+      closeContextMenu();
+    }
+  });
+  document.addEventListener('touchstart', (e) => {
+    if (contextMenu.classList.contains('active') && !contextMenu.contains(e.target)) {
+      closeContextMenu();
+    }
+  });
+
+  function renderRecalledContent(row, msg, isMine) {
+    row.innerHTML = '';
+    const placeholder = document.createElement('div');
+    placeholder.className = 'recalled-msg';
+    placeholder.textContent = isMine ? '你撤回了一条消息' : `${msg.from} 撤回了一条消息`;
+    row.appendChild(placeholder);
+  }
+
+  function updateMessageRow(messageId, msg) {
+    const row = messageRowMap.get(messageId);
+    if (!row) return;
+    const isMine = msg.from === myUsername;
+    if (msg.recalled) {
+      renderRecalledContent(row, msg, isMine);
+    } else {
+      renderNormalContent(row, messageId, msg, isMine);
+    }
   }
 </script>
 </body>
