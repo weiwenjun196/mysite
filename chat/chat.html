@@ -35,6 +35,25 @@
     justify-content: space-between;
     align-items: center;
   }
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .back-btn {
+    background: rgba(255,255,255,0.25);
+    border: none;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .back-btn:hover { background: rgba(255,255,255,0.4); }
   .header .status { font-size: 12px; opacity: 0.85; font-weight: normal; }
   .logout-btn {
     background: rgba(255,255,255,0.25);
@@ -152,7 +171,10 @@
 
 <div class="app">
   <div class="header">
-    <span id="headerTitle">聊天室</span>
+    <div class="header-left">
+      <button class="back-btn" onclick="goBackToContacts()">←</button>
+      <span id="headerTitle">聊天室</span>
+    </div>
     <div style="display:flex; align-items:center; gap:10px;">
       <span class="status" id="statusText"></span>
       <button class="logout-btn" id="clearAllBtn">清空记录</button>
@@ -182,8 +204,6 @@
   const auth = firebase.auth();
   const db = firebase.database();
 
-  const CHAT_PAIR = ["bob", "admin"];
-
   const RECALL_TIME_LIMIT_MS = 2 * 60 * 1000;
 
   const messagesEl = document.getElementById('messages');
@@ -207,8 +227,18 @@
   const LONG_PRESS_DURATION = 450;
 
   const messageRowMap = new Map();
-  const messageDataMap = new Map(); // messageId -> 原始消息内容，清空记录时需要遍历用
-  const hiddenIds = new Set(); // 我自己隐藏（删除/清空）了哪些消息id，本地缓存一份方便快速判断
+  const messageDataMap = new Map();
+  const hiddenIds = new Set();
+
+  function goBackToContacts() {
+    window.location.href = "contacts.html";
+  }
+
+  // 从网址参数里读取要跟谁聊天，例如 chat.html?with=tangli
+  function getOtherUserFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('with');
+  }
 
   auth.onAuthStateChanged((user) => {
     if (!user) {
@@ -218,16 +248,22 @@
 
     myUsername = user.email.split('@')[0];
 
-    if (!CHAT_PAIR.includes(myUsername)) {
+    if (!ALL_USERS.includes(myUsername)) {
       loadingScreen.textContent = "当前账号未配置聊天权限";
       return;
     }
 
-    otherUsername = CHAT_PAIR.find(name => name !== myUsername);
+    otherUsername = getOtherUserFromURL();
+
+    if (!otherUsername || !ALL_USERS.includes(otherUsername) || otherUsername === myUsername) {
+      loadingScreen.textContent = "未指定有效的聊天对象，请返回重新选择";
+      return;
+    }
+
     headerTitle.textContent = `与 ${otherUsername} 聊天中`;
     statusText.textContent = `我是 ${myUsername}`;
 
-    chatRoomId = CHAT_PAIR.slice().sort().join('_');
+    chatRoomId = [myUsername, otherUsername].sort().join('_');
 
     loadingScreen.style.display = 'none';
     messagesEl.style.display = 'flex';
@@ -235,12 +271,18 @@
     msgInput.focus();
 
     listenForMessages();
+    markAsRead();
   });
 
   function logout() {
     auth.signOut().then(() => {
       window.location.href = "login.html";
     });
+  }
+
+  // 把"我读到了现在这个时间点"写入数据库，供联系人列表页计算未读数使用
+  function markAsRead() {
+    db.ref(`chats/${chatRoomId}/lastRead/${myUsername}`).set(firebase.database.ServerValue.TIMESTAMP);
   }
 
   function sendMessage() {
@@ -253,6 +295,7 @@
       time: firebase.database.ServerValue.TIMESTAMP
     });
     msgInput.value = '';
+    markAsRead();
   }
   sendBtn.addEventListener('click', sendMessage);
   msgInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage(); });
@@ -271,6 +314,8 @@
         if (!hiddenIds.has(msgSnapshot.key)) {
           renderMessage(msgSnapshot.key, msgSnapshot.val());
         }
+        // 收到新消息时，如果聊天窗口正打开着，顺手标记为已读
+        markAsRead();
       });
 
       messagesRef.on('child_changed', (msgSnapshot) => {
@@ -281,9 +326,6 @@
       });
     });
 
-    // 监听"我隐藏了哪些消息"这个列表的变化，用于实现删除/清空功能
-    // 用 child_added 而不是 value，这样每新增一条隐藏记录，只处理这一条，
-    // 不需要重新渲染整个消息列表
     hiddenRef.on('child_added', (snapshot) => {
       const messageId = snapshot.key;
       hiddenIds.add(messageId);
@@ -303,13 +345,11 @@
     });
   }
 
-  // 删除：只隐藏在我自己这边，不影响数据库原始消息，对方完全无感知
   function deleteMessageForMe(messageId) {
     if (!confirm('删除这条消息？仅你自己看不到，对方仍能看到。')) return;
     db.ref(`chats/${chatRoomId}/hiddenFor/${myUsername}/${messageId}`).set(true);
   }
 
-  // 清空记录：把当前已知的所有消息id都标记为"对我隐藏"，同样不影响对方
   function clearAllForMe() {
     if (!confirm('清空聊天记录？仅你自己这边会清空，对方依然能看到完整记录。')) return;
     const updates = {};
