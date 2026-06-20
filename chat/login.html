@@ -94,8 +94,11 @@ function login(){
     alert("请输入用户名和密码");
     return;
   }
-
-  window.location.href = "chat.html";
+  if(u === "bob" && p === "234789"){
+    window.location.href = "chat.html";
+  }else{
+    alert("用户名或密码错误");
+  }
 }
 </script>
 
