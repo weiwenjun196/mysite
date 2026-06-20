@@ -73,6 +73,30 @@ h1{
   animation:fadeUp 0.8s ease forwards;
   animation-delay:0.2s;
 }
+
+.chat-btn {
+  display: inline-block;
+  color: white;
+  background-color: #90caf8;
+  padding: 14px 38px;
+  font-size: 24px;
+  font-weight: bold;
+  text-decoration: none;
+  border-radius: 50px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.chat-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+}
+
+.chat-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.20);
+}
+
 @keyframes fadeIn{
   from{
     opacity:0;
@@ -145,6 +169,7 @@ h1{
 </style>
 </head>
 <body>
+
 <div class="section intro" id="intro-section">
   <div class="card">
     <a href="about.html">
@@ -162,14 +187,17 @@ h1{
     </button>
   </div>
 </div>
+
 <div class="section next" id="next-section">
- <h1>Chat with me</h1>
+  <a href="chat.html" class="chat-btn">Chat with me</a>
 </div>
+
 <script>
 let isActive = false;
 let isAnimating = false;
 const introEl = document.getElementById('intro-section');
 const nextEl = document.getElementById('next-section');
+
 function goToNext(){
   if(isAnimating || isActive) return;
   isAnimating = true;
@@ -178,6 +206,7 @@ function goToNext(){
   nextEl.classList.add('active');
   setTimeout(()=>{ isAnimating = false; }, 800);
 }
+
 function goToPrev(){
   if(isAnimating || !isActive) return;
   isAnimating = true;
@@ -186,6 +215,7 @@ function goToPrev(){
   nextEl.classList.remove('active');
   setTimeout(()=>{ isAnimating = false; }, 800);
 }
+
 window.addEventListener('wheel', function(e){
   if(e.deltaY > 0){
     goToNext();
@@ -193,10 +223,12 @@ window.addEventListener('wheel', function(e){
     goToPrev();
   }
 }, {passive:true});
+
 let touchStartY = 0;
 window.addEventListener('touchstart', function(e){
   touchStartY = e.touches[0].clientY;
 }, {passive:true});
+
 window.addEventListener('touchend', function(e){
   const touchEndY = e.changedTouches[0].clientY;
   const diff = touchStartY - touchEndY;
