@@ -122,10 +122,9 @@ button:active,
     <a href="../index.html" class="back-btn">返回主页</a>
     <button id="loginBtn" onclick="login()">Login</button>
   </div>
-  <div class="hint">提示：</div>
+  <div class="hint">提示:使用Firebase 中国大陆用户需开启VPN/代理登录</div>
 </div>
 
-<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="firebase-config.js"></script>
@@ -134,13 +133,11 @@ button:active,
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
 
-  // 邮箱域名后缀，与你在 Firebase 控制台创建账号时使用的一致
   const EMAIL_DOMAIN = "@mysite.com";
 
   const errorMsg = document.getElementById('errorMsg');
   const loginBtn = document.getElementById('loginBtn');
 
-  // 如果已经登录过，直接跳转聊天页，不用重复输入
   auth.onAuthStateChanged((user) => {
     if (user) {
       window.location.href = "contacts.html";
