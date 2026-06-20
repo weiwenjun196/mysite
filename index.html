@@ -74,37 +74,51 @@ h1{
   animation-delay:0.2s;
 }
 
-.chat-btn {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-
-  display: inline-block;
-  color: white;
-  background-color: #c1defb;
-  padding: 14px 38px;
-  font-size: 24px;
-  font-weight: bold;
-  text-decoration: none;
-  border-radius: 50px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
-
+.chat-wrap{
+  position:fixed;
+  top:20px;
+  right:20px;
   opacity:0;
   animation:fadeButton 0.8s ease forwards;
-  animation-delay:0.2s;
+  animation-delay:0.4s;
 }
 
-.chat-btn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+.chat-btn{
+  display:inline-block;
+  color:white;
+  background-color:#c1defb;
+  padding:14px 38px;
+  font-size:24px;
+  font-weight:bold;
+  text-decoration:none;
+  border-radius:50px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.25);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
 }
 
-.chat-btn:active {
-  transform: scale(0.95);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.20);
+.chat-btn:hover{
+  transform:scale(1.05);
+  box-shadow:0 8px 20px rgba(0,0,0,0.35);
 }
 
+.chat-btn:active{
+  transform:scale(0.95);
+  box-shadow:0 4px 12px rgba(0,0,0,0.20);
+}
+
+@keyframes fadeButton{
+  from{
+    opacity:0;
+    transform:translateY(20px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
 @keyframes fadeIn{
   from{
     opacity:0;
@@ -125,16 +139,7 @@ h1{
     transform:translateY(0);
   }
 }
-@keyframes fadeButton{
-  from{
-    opacity:0;
-    transform:translateY(20px);
-  }
-  to{
-    opacity:1;
-    transform:translateY(0);
-  }
-}
+
 .scroll-down-wrap{
   position:absolute;
   bottom:30px;
@@ -189,7 +194,9 @@ h1{
 <body>
 
 <div class="section intro" id="intro-section">
-  <a href="chat/login.html" class="chat-btn">Chat with me</a>
+  <div class="chat-wrap">
+    <a href="chat/login.html" class="chat-btn">Chat with me</a>
+  </div>
   <div class="card">
     <a href="about.html">
       <img src="avatar.jpg" alt="avatar">
