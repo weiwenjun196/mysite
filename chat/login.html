@@ -90,15 +90,10 @@ function login(){
   const u = document.getElementById('username').value;
   const p = document.getElementById('password').value;
 
-  if(!u || !p){
-    alert("请输入用户名和密码");
-    return;
-  }
-  if(u === "bob" && p === "234789"){
-    window.location.href = "chat.html";
-  }else{
-    alert("用户名或密码错误");
-  }
+  if(!u || !p) alert("请输入用户名和密码");
+  if(u === "bob" && p === "234789") window.location.href = "chat.html";
+  
+  alert("用户名或密码错误");
 }
 </script>
 
