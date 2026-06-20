@@ -268,8 +268,15 @@ window.addEventListener('touchend', function(e){
 }, {passive:true});
 
 window.addEventListener('keydown', e => {
-    if(e.key === 'ArrowDown') goToNext();
-    if(e.key === 'ArrowUp') goToPrev();
+    if (isAnimating) return;
+    
+    if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        goToNext();
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        goToPrev();
+    }
 });
 
 </script>
