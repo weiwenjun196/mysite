@@ -5,16 +5,22 @@
 <title>Login</title>
 
 <style>
-body{
+html, body{
   margin:0;
   height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  background:linear-gradient(135deg,#90caf8,#64b5f6);
+  overflow:hidden;
   font-family:Arial;
 }
 
+/* 背景 */
+body{
+  background:linear-gradient(135deg,#90caf8,#64b5f6);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+/* 登录卡片 */
 .login-box{
   width:360px;
   padding:40px;
@@ -29,6 +35,7 @@ h2{
   color:#333;
 }
 
+/* 输入框 */
 input{
   width:100%;
   padding:12px;
@@ -36,44 +43,33 @@ input{
   border:1px solid #ddd;
   border-radius:8px;
   outline:none;
-  transition:0.2s;
-  font-size:16px;
 }
 
-input:focus{
-  border-color:#64b5f6;
-  box-shadow:0 0 8px rgba(100,181,246,0.4);
-}
-
+/* ===== 按钮并列区域 ===== */
 .btn-row{
   display:flex;
   gap:12px;
   margin-top:18px;
 }
 
+/* Login按钮 */
 button{
   flex:1;
   padding:14px;
   border:none;
-  border-radius:50px;
+  border-radius:8px;
   background:#64b5f6;
   color:white;
-  font-size:24px;
-  font-weight:bold;
+  font-size:16px;
   cursor:pointer;
-  box-shadow:0 4px 12px rgba(0,0,0,0.25);
   transition:0.2s;
 }
 
 button:hover{
-  transform:scale(1.05);
-  box-shadow:0 8px 20px rgba(0,0,0,0.35);
+  transform:scale(1.03);
 }
 
-button:active{
-  transform:scale(0.95);
-}
-
+/* 返回主页按钮 */
 .back-btn{
   flex:1;
   display:flex;
@@ -84,22 +80,19 @@ button:active{
   background:#90caf8;
   color:white;
   text-decoration:none;
+  font-size:16px;
 
-  font-size:24px;
-  font-weight:bold;
-
-  border-radius:50px;
-  box-shadow:0 4px 12px rgba(0,0,0,0.25);
+  border-radius:8px;
   transition:0.2s;
 }
 
 .back-btn:hover{
-  transform:scale(1.05);
-  box-shadow:0 8px 20px rgba(0,0,0,0.35);
+  transform:scale(1.03);
 }
 
+button:active,
 .back-btn:active{
-  transform:scale(0.95);
+  transform:scale(0.97);
 }
 
 .small{
@@ -118,11 +111,13 @@ button:active{
   <input type="text" id="username" placeholder="Username">
   <input type="password" id="password" placeholder="Password">
 
+  <!-- 并列按钮 -->
   <div class="btn-row">
     <button onclick="login()">Login</button>
     <a href="../index.html" class="back-btn">返回主页</a>
   </div>
 
+  <div class="small">Demo: bob / 234789</div>
 </div>
 
 <script>
@@ -130,9 +125,7 @@ function login(){
   const u = document.getElementById('username').value;
   const p = document.getElementById('password').value;
 
-  const users = {
-    bob: "234789"
-  };
+  const users = { bob: "234789" };
 
   if(!u || !p){
     alert("请输入用户名和密码");
