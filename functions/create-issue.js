@@ -1,9 +1,26 @@
 const https = require("https");
 
+const headers = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "Content-Type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
 exports.handler = async (event) => {
+
+  if (event.httpMethod === "OPTIONS") {
+    return {
+      statusCode: 200,
+      headers,
+      body: ""
+    };
+  }
+
+  // ❌ 只允许 POST
   if (event.httpMethod !== "POST") {
     return {
       statusCode: 405,
+      headers,
       body: JSON.stringify({ error: "Method Not Allowed" })
     };
   }
@@ -11,34 +28,20 @@ exports.handler = async (event) => {
   try {
     const { name, email, message } = JSON.parse(event.body || "{}");
 
-    if (!name || !email || !message) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: "缺少字段" })
-      };
-    }
-
     const token = process.env.GITHUB_TOKEN;
 
     if (!token) {
       return {
         statusCode: 500,
-        body: JSON.stringify({ error: "没有配置 GITHUB_TOKEN" })
+        headers,
+        body: JSON.stringify({ error: "Missing GitHub token" })
       };
     }
 
-    const issue = {
-      title: `💬 来自 ${name} 的留言`,
-      body:
-`**Name:** ${name}
-**Email:** ${email}
-
-**Message:**
-${message}`,
-      labels: ["message"]
-    };
-
-    const payload = JSON.stringify(issue);
+    const payload = JSON.stringify({
+      title: `💬 ${name}`,
+      body: `Email: ${email}\n\n${message}`
+    });
 
     return new Promise((resolve) => {
       const req = https.request({
@@ -47,35 +50,27 @@ ${message}`,
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,
-          "User-Agent": "Netlify-Function",
+          "User-Agent": "netlify",
           "Content-Type": "application/json"
         }
       }, (res) => {
         let data = "";
 
-        res.on("data", (chunk) => data += chunk);
+        res.on("data", chunk => data += chunk);
 
         res.on("end", () => {
-          if (res.statusCode === 201) {
-            resolve({
-              statusCode: 200,
-              body: JSON.stringify({ success: true })
-            });
-          } else {
-            resolve({
-              statusCode: 500,
-              body: JSON.stringify({
-                error: "GitHub 创建失败",
-                detail: data
-              })
-            });
-          }
+          resolve({
+            statusCode: 200,
+            headers,
+            body: JSON.stringify({ ok: true })
+          });
         });
       });
 
       req.on("error", (err) => {
         resolve({
           statusCode: 500,
+          headers,
           body: JSON.stringify({ error: err.message })
         });
       });
@@ -87,6 +82,7 @@ ${message}`,
   } catch (err) {
     return {
       statusCode: 500,
+      headers,
       body: JSON.stringify({ error: err.message })
     };
   }
