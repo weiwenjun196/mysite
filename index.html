@@ -89,11 +89,15 @@ h1{
   border-radius: 50px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.25);
   transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+
+  opacity: 0;
+  animation: fadeUp 0.8s ease forwards;
+  animation-delay: 0.4s;
 }
 
 .chat-btn:hover {
   transform: scale(1.05);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.30);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.35);
 }
 
 .chat-btn:active {
@@ -194,7 +198,7 @@ h1{
 </div>
 
 <div class="section next" id="next-section">
-  <h1>更多功能开发中...</h1>
+  <h1>功能开发中...</h1>
 </div>
 
 <script>
