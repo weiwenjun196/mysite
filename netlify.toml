@@ -1,0 +1,6 @@
+[build]
+  functions = "functions"
+  command = "echo 'Building...'"
+
+[context.production]
+  environment = { NODE_VERSION = "18" }
