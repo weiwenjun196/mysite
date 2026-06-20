@@ -155,6 +155,7 @@
     <span id="headerTitle">聊天室</span>
     <div style="display:flex; align-items:center; gap:10px;">
       <span class="status" id="statusText"></span>
+      <button class="logout-btn" id="clearAllBtn">清空记录</button>
       <button class="logout-btn" onclick="logout()">退出</button>
     </div>
   </div>
@@ -168,6 +169,7 @@
 
 <div class="context-menu" id="contextMenu">
   <button class="danger" id="recallMenuItem">撤回</button>
+  <button class="danger" id="deleteMenuItem">删除</button>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -193,6 +195,8 @@
   const statusText = document.getElementById('statusText');
   const contextMenu = document.getElementById('contextMenu');
   const recallMenuItem = document.getElementById('recallMenuItem');
+  const deleteMenuItem = document.getElementById('deleteMenuItem');
+  const clearAllBtn = document.getElementById('clearAllBtn');
 
   let myUsername = '';
   let otherUsername = '';
@@ -203,6 +207,8 @@
   const LONG_PRESS_DURATION = 450;
 
   const messageRowMap = new Map();
+  const messageDataMap = new Map(); // messageId -> 原始消息内容，清空记录时需要遍历用
+  const hiddenIds = new Set(); // 我自己隐藏（删除/清空）了哪些消息id，本地缓存一份方便快速判断
 
   auth.onAuthStateChanged((user) => {
     if (!user) {
@@ -252,14 +258,40 @@
   msgInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage(); });
 
   function listenForMessages() {
-    const messagesRef = db.ref(`chats/${chatRoomId}/messages`).limitToLast(100);
+    const hiddenRef = db.ref(`chats/${chatRoomId}/hiddenFor/${myUsername}`);
 
-    messagesRef.on('child_added', (snapshot) => {
-      renderMessage(snapshot.key, snapshot.val());
+    hiddenRef.once('value', (snapshot) => {
+      const hiddenData = snapshot.val() || {};
+      Object.keys(hiddenData).forEach((id) => hiddenIds.add(id));
+
+      const messagesRef = db.ref(`chats/${chatRoomId}/messages`).limitToLast(100);
+
+      messagesRef.on('child_added', (msgSnapshot) => {
+        messageDataMap.set(msgSnapshot.key, msgSnapshot.val());
+        if (!hiddenIds.has(msgSnapshot.key)) {
+          renderMessage(msgSnapshot.key, msgSnapshot.val());
+        }
+      });
+
+      messagesRef.on('child_changed', (msgSnapshot) => {
+        messageDataMap.set(msgSnapshot.key, msgSnapshot.val());
+        if (!hiddenIds.has(msgSnapshot.key)) {
+          updateMessageRow(msgSnapshot.key, msgSnapshot.val());
+        }
+      });
     });
 
-    messagesRef.on('child_changed', (snapshot) => {
-      updateMessageRow(snapshot.key, snapshot.val());
+    // 监听"我隐藏了哪些消息"这个列表的变化，用于实现删除/清空功能
+    // 用 child_added 而不是 value，这样每新增一条隐藏记录，只处理这一条，
+    // 不需要重新渲染整个消息列表
+    hiddenRef.on('child_added', (snapshot) => {
+      const messageId = snapshot.key;
+      hiddenIds.add(messageId);
+      const row = messageRowMap.get(messageId);
+      if (row) {
+        row.remove();
+        messageRowMap.delete(messageId);
+      }
     });
   }
 
@@ -270,6 +302,24 @@
       text: ''
     });
   }
+
+  // 删除：只隐藏在我自己这边，不影响数据库原始消息，对方完全无感知
+  function deleteMessageForMe(messageId) {
+    if (!confirm('删除这条消息？仅你自己看不到，对方仍能看到。')) return;
+    db.ref(`chats/${chatRoomId}/hiddenFor/${myUsername}/${messageId}`).set(true);
+  }
+
+  // 清空记录：把当前已知的所有消息id都标记为"对我隐藏"，同样不影响对方
+  function clearAllForMe() {
+    if (!confirm('清空聊天记录？仅你自己这边会清空，对方依然能看到完整记录。')) return;
+    const updates = {};
+    messageDataMap.forEach((_, messageId) => {
+      updates[`chats/${chatRoomId}/hiddenFor/${myUsername}/${messageId}`] = true;
+    });
+    if (Object.keys(updates).length === 0) return;
+    db.ref().update(updates);
+  }
+  clearAllBtn.addEventListener('click', clearAllForMe);
 
   function renderMessage(messageId, msg) {
     const row = document.createElement('div');
@@ -306,27 +356,24 @@
     wrap.appendChild(bubble);
     row.appendChild(wrap);
 
-    if (isMine) {
-      const withinTimeLimit = RECALL_TIME_LIMIT_MS === 0 ||
-        (Date.now() - (msg.time || 0)) < RECALL_TIME_LIMIT_MS;
-
-      if (withinTimeLimit) {
-        bindContextMenuEvents(bubble, messageId);
-      }
-    }
+    const canRecall = isMine && (
+      RECALL_TIME_LIMIT_MS === 0 ||
+      (Date.now() - (msg.time || 0)) < RECALL_TIME_LIMIT_MS
+    );
+    bindContextMenuEvents(bubble, messageId, isMine, canRecall);
   }
 
-  function bindContextMenuEvents(bubble, messageId) {
+  function bindContextMenuEvents(bubble, messageId, isMine, canRecall) {
     bubble.addEventListener('contextmenu', (e) => {
       e.preventDefault();
-      openContextMenu(e.clientX, e.clientY, messageId);
+      openContextMenu(e.clientX, e.clientY, messageId, canRecall);
     });
 
     bubble.addEventListener('touchstart', (e) => {
       bubble.classList.add('pressed');
       const touch = e.touches[0];
       longPressTimer = setTimeout(() => {
-        openContextMenu(touch.clientX, touch.clientY, messageId);
+        openContextMenu(touch.clientX, touch.clientY, messageId, canRecall);
         bubble.classList.remove('pressed');
       }, LONG_PRESS_DURATION);
     }, { passive: true });
@@ -342,8 +389,9 @@
     });
   }
 
-  function openContextMenu(x, y, messageId) {
+  function openContextMenu(x, y, messageId, canRecall) {
     activeMessageId = messageId;
+    recallMenuItem.style.display = canRecall ? 'block' : 'none';
     contextMenu.classList.add('active');
 
     const menuRect = contextMenu.getBoundingClientRect();
@@ -362,6 +410,13 @@
   recallMenuItem.addEventListener('click', () => {
     if (activeMessageId) {
       recallMessage(activeMessageId);
+    }
+    closeContextMenu();
+  });
+
+  deleteMenuItem.addEventListener('click', () => {
+    if (activeMessageId) {
+      deleteMessageForMe(activeMessageId);
     }
     closeContextMenu();
   });
