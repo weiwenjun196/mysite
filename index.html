@@ -109,11 +109,31 @@ h1{
   box-shadow:0 4px 12px rgba(0,0,0,0.15);
 }
 
-.next-content{
+.next-wrapper{
   display:flex;
   flex-direction:column;
+  width:100%;
+  height:100%;
+  justify-content:center;
   align-items:center;
+}
+
+.next-title{
+  position:absolute;
+  top:60px;
+  font-size:36px;
+  font-weight:bold;
+  opacity:0;
+  animation:fadeUp 0.8s ease forwards;
+  animation-delay:0.1s;
+}
+
+.next-content{
+  display:flex;
+  flex-direction:row;
   gap:40px;
+  align-items:center;
+  justify-content:center;
 }
 
 .chat-btn{
@@ -130,9 +150,6 @@ h1{
     transform 0.2s ease,
     box-shadow 0.2s ease,
     background-color 0.2s ease;
-  opacity:0;
-  animation:fadeUp 0.8s ease forwards;
-  animation-delay:0.3s;
 }
 
 .chat-btn:hover{
@@ -145,10 +162,10 @@ h1{
   box-shadow:0 4px 12px rgba(0,0,0,0.15);
 }
 
-.next-title{
+.developing-text{
   opacity:0;
   animation:fadeUp 0.8s ease forwards;
-  animation-delay:0.1s;
+  animation-delay:0.3s;
 }
 
 @keyframes fadeButton{
@@ -257,9 +274,14 @@ h1{
 </div>
 
 <div class="section next" id="next-section">
-  <div class="next-content">
-    <h1 class="next-title">其他功能开发中...</h1>
-    <a href="chat/login.html" class="chat-btn">进入聊天室</a>
+  <div class="next-wrapper">
+    <div class="next-title">Something fun</div>
+    <div class="next-content">
+      <a href="chat/login.html" class="chat-btn">聊天室</a>
+      <div class="developing-text">
+        <h1>其他功能开发中...</h1>
+      </div>
+    </div>
   </div>
 </div>
 
