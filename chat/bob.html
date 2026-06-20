@@ -1,1 +1,96 @@
-<a>Login successful</a>
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bob - Chat</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; display:flex; flex-direction:column; height:100vh }
+    header { background:#2b7cff; color:white; padding:12px 16px }
+    main { flex:1; display:flex; flex-direction:column; padding:12px }
+    #messages { flex:1; border:1px solid #ddd; padding:8px; overflow:auto; background:#f9f9f9 }
+    .msg { margin:6px 0; }
+    .msg.me { text-align:right }
+    .msg .meta { font-size:12px; color:#666 }
+    .msg .text { display:inline-block; padding:8px 10px; border-radius:10px; max-width:70%; }
+    .msg.me .text { background:#cfe9ff }
+    .msg.them .text { background:#eee }
+    form { display:flex; gap:8px; margin-top:8px }
+    input[type=text] { flex:1; padding:8px; font-size:14px }
+    button { padding:8px 12px; font-size:14px }
+    .note { font-size:12px; color:#444; margin-top:8px }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Bob - 聊天</h1>
+  </header>
+  <main>
+    <div id="messages" aria-live="polite"></div>
+
+    <form id="chatForm">
+      <input id="input" type="text" placeholder="输入消息并回车或点击发送" autocomplete="off" />
+      <button type="submit">发送</button>
+    </form>
+    <div class="note">说明：此示例使用 localStorage 在同一浏览器的不同标签/窗口间同步消息；跨设备或不同浏览器不适用。</div>
+  </main>
+
+  <script>
+    // 用户身份（固定为 bob）
+    const USER = 'bob';
+    const STORAGE_KEY = 'mysite-chat-messages';
+
+    function loadMessages(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      }catch(e){ return [] }
+    }
+    function saveMessages(msgs){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(msgs));
+    }
+
+    const messagesEl = document.getElementById('messages');
+    const inputEl = document.getElementById('input');
+    const form = document.getElementById('chatForm');
+
+    function render(){
+      const msgs = loadMessages();
+      messagesEl.innerHTML = '';
+      msgs.forEach(m => {
+        const div = document.createElement('div');
+        div.className = 'msg ' + (m.user === USER ? 'me' : 'them');
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        meta.textContent = m.user + ' · ' + new Date(m.time).toLocaleString();
+        const text = document.createElement('div');
+        text.className = 'text';
+        text.textContent = m.text;
+        div.appendChild(meta);
+        div.appendChild(text);
+        messagesEl.appendChild(div);
+      });
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const text = inputEl.value.trim();
+      if(!text) return;
+      const msgs = loadMessages();
+      msgs.push({ user: USER, text, time: Date.now() });
+      saveMessages(msgs);
+      inputEl.value = '';
+      render();
+    });
+
+    // 当其他标签/窗口更新 localStorage 时，同步内容
+    window.addEventListener('storage', (e) => {
+      if(e.key === STORAGE_KEY) render();
+    });
+
+    // 初始渲染
+    render();
+  </script>
+</body>
+</html>
