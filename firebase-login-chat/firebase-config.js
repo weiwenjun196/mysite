@@ -1,7 +1,3 @@
-// =========================================================
-// 你的 Firebase 项目配置（与之前聊天demo用的是同一个项目）
-// =========================================================
-
 const firebaseConfig = {
   apiKey: "AIzaSyBvUEAPV1Sfw2NCLSyiiLk30FrYKP1pA-Y",
   authDomain: "mysite-491e8.firebaseapp.com",
@@ -12,7 +8,6 @@ const firebaseConfig = {
   appId: "1:840336638207:web:2bea198b8a935048084cca",
   measurementId: "G-S8DKWQFMJF"
 };
-
 /*
 ========== 使用前必须先做这一步：开启 Authentication ==========
 
