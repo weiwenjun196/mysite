@@ -266,6 +266,12 @@ window.addEventListener('touchend', function(e){
     goToPrev();
   }
 }, {passive:true});
+
+window.addEventListener('keydown', e => {
+    if(e.key === 'ArrowDown') goToNext();
+    if(e.key === 'ArrowUp') goToPrev();
+});
+
 </script>
 </body>
 </html>
