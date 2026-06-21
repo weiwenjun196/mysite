@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>管理后台</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100vh; }
+  body {
+    font-family: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+  }
+  .container {
+    width: 100%;
+    max-width: 720px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    overflow: hidden;
+    min-height: 70vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .header {
+    background: #2c3e50;
+    color: white;
+    padding: 16px 20px;
+    font-weight: 600;
+    font-size: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .logout-btn {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: white;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+  .logout-btn:hover { background: rgba(255,255,255,0.28); }
+  .content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #aaa;
+    font-size: 14px;
+    padding: 40px;
+  }
+
+  .gate-screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 40px;
+  }
+  .gate-title { 
+    font-size: 16px;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 20px;
+ }
+  .gate-screen input {
+    width: 240px;
+    padding: 10px 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    text-align: center;
+  }
+  .gate-screen input:focus {
+    border-color: #64b5f6;
+    box-shadow: 0 0 0 3px rgba(100,181,246,0.2);
+  }
+  .gate-screen button {
+    width: 240px;
+    padding: 10px;
+    background: #2c3e50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .gate-screen button:hover { background: #1f2c38; }
+  .gate-screen button:disabled { opacity: 0.6; cursor: not-allowed; }
+  .gate-error {
+    color: #e53935;
+    font-size: 13px;
+    min-height: 18px;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div id="gateScreen" class="gate-screen">
+    <div class="gate-title">请输入管理员密码</div>
+    <input type="password" id="passwordInput" placeholder="密码" autocomplete="off" />
+    <div class="gate-error" id="gateError"></div>
+    <button id="unlockBtn">进入</button>
+  </div>
+
+  <div id="adminPanel" style="display:none; flex-direction:column; flex:1;">
+    <div class="header">
+      <span>管理后台</span>
+      <button class="logout-btn" onclick="lockAgain()">锁定</button>
+    </div>
+    <div class="content">
+      管理功能正在建设中
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="firebase-config.js"></script>
+
+<script>
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+
+  const ADMIN_EMAIL = "admin@mysite.com";
+
+  const gateScreen = document.getElementById('gateScreen');
+  const adminPanel = document.getElementById('adminPanel');
+  const passwordInput = document.getElementById('passwordInput');
+  const gateError = document.getElementById('gateError');
+  const unlockBtn = document.getElementById('unlockBtn');
+
+  passwordInput.focus();
+
+  function tryUnlock() {
+    const password = passwordInput.value;
+    gateError.textContent = '';
+
+    if (!password) {
+      gateError.textContent = '请输入密码';
+      return;
+    }
+
+    unlockBtn.disabled = true;
+    unlockBtn.textContent = '验证中...';
+
+    auth.signInWithEmailAndPassword(ADMIN_EMAIL, password)
+      .then(() => {
+        auth.signOut();
+        gateScreen.style.display = 'none';
+        adminPanel.style.display = 'flex';
+      })
+      .catch((error) => {
+        unlockBtn.disabled = false;
+        unlockBtn.textContent = '进入';
+        if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
+          gateError.textContent = '密码错误';
+        } else if (error.code === 'auth/too-many-requests') {
+          gateError.textContent = '尝试次数过多，请稍后再试';
+        } else {
+          gateError.textContent = '验证失败: ' + error.message;
+        }
+        passwordInput.value = '';
+        passwordInput.focus();
+      });
+  }
+
+  unlockBtn.addEventListener('click', tryUnlock);
+  passwordInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') tryUnlock();
+  });
+
+  function lockAgain() {
+    adminPanel.style.display = 'none';
+    gateScreen.style.display = 'flex';
+    passwordInput.value = '';
+    passwordInput.focus();
+
+    unlockBtn.disabled = false;
+    unlockBtn.textContent = '进入';
+    gateError.textContent = '';
+  }
+</script>
+</body>
+</html>
