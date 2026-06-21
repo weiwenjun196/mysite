@@ -4,14 +4,16 @@
 <meta charset="UTF-8">
 <title>weiwenjun</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&display=swap');
+
 html, body{
   margin:0;
   height:100vh;
   overflow:hidden;
 }
 body{
-  font-family:Arial;
-  color:white;
+  font-family:'Inter', Arial, sans-serif;
+  color:#fbfcfe;
 }
 .section{
   position:fixed;
@@ -23,10 +25,12 @@ body{
   align-items:center;
   text-align:center;
   overflow:hidden;
-  transition:transform 0.8s cubic-bezier(0.65,0,0.35,1);
+  transition:transform 0.85s cubic-bezier(0.65,0,0.35,1);
 }
 .section.intro{
-  background:#90caf8;
+  background:
+    radial-gradient(circle at 20% 15%, rgba(255,255,255,0.16), transparent 55%),
+    linear-gradient(165deg, #5e93e8 0%, #6fa3ee 38%, #8cbcf2 75%, #aed0f5 100%);
   top:0;
   transform:translateY(0);
   z-index:1;
@@ -35,7 +39,9 @@ body{
   transform:translateY(-100vh);
 }
 .section.next{
-  background:#64b5f6;
+  background:
+    radial-gradient(circle at 80% 85%, rgba(255,255,255,0.14), transparent 55%),
+    linear-gradient(165deg, #4d80d6 0%, #5e93e8 45%, #7badec 100%);
   top:100vh;
   transform:translateY(0);
   z-index:1;
@@ -43,70 +49,120 @@ body{
 .section.next.active{
   transform:translateY(-100vh);
 }
+
 .card{
   display:flex;
   flex-direction:column;
   align-items:center;
   animation:fadeIn 1s ease forwards;
 }
+.avatar-link{
+  position:relative;
+  display:inline-block;
+  border-radius:50%;
+  margin-bottom:22px;
+}
+.avatar-ring{
+  position:absolute;
+  inset:-7px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,0.55);
+  transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1), border-color 0.35s ease;
+}
 img{
-  width:120px;
-  height:120px;
+  display:block;
+  width:128px;
+  height:128px;
   object-fit:cover;
-  margin-bottom:15px;
-  border-radius:10px;
-  box-shadow:0 4px 12px rgba(0,0,0,0.25);
-  transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
+  border-radius:50%;
+  box-shadow:0 10px 30px rgba(20,40,80,0.28);
+  transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.35s ease;
 }
-img:hover{
-  transform:scale(1.1);
-  box-shadow:0 8px 20px rgba(0,0,0,0.35);
+.avatar-link:hover img{
+  transform:scale(1.045);
+  box-shadow:0 14px 38px rgba(20,40,80,0.34);
 }
-img:active{
-  transform:scale(0.95);
-  box-shadow:0 8px 20px rgba(0,0,0,0.20);
+.avatar-link:hover .avatar-ring{
+  transform:scale(1.12);
+  border-color:rgba(255,255,255,0.85);
 }
+.avatar-link:active img{
+  transform:scale(0.97);
+}
+
 h1{
+  margin:0;
+  font-family:'Source Serif 4', Georgia, serif;
+  font-weight:500;
+  font-style:italic;
+  font-size:34px;
+  letter-spacing:0.2px;
+  color:#ffffff;
+  text-shadow:0 2px 18px rgba(20,50,100,0.18);
   opacity:0;
   animation:fadeUp 0.8s ease forwards;
   animation-delay:0.2s;
 }
+.eyebrow{
+  display:block;
+  font-family:'Inter', sans-serif;
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:3.5px;
+  text-transform:uppercase;
+  color:rgba(255,255,255,0.72);
+  margin-bottom:10px;
+  opacity:0;
+  animation:fadeUp 0.8s ease forwards;
+  animation-delay:0.05s;
+}
 
 .message-wrap{
   position:fixed;
-  top:20px;
-  right:20px;
+  top:28px;
+  right:28px;
   opacity:0;
   animation:fadeButton 0.8s ease forwards;
-  animation-delay:0.4s;
+  animation-delay:0.45s;
+  z-index:3;
 }
-
 .message-btn{
-  display:inline-block;
-  color:white;
-  background-color:#c1defb;
-  padding:14px 38px;
-  font-size:24px;
-  font-weight:bold;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  color:#fbfcfe;
+  background:rgba(255,255,255,0.10);
+  border:1px solid rgba(255,255,255,0.38);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  padding:11px 26px;
+  font-size:14px;
+  font-weight:500;
+  letter-spacing:0.3px;
+  font-family:'Inter', sans-serif;
   text-decoration:none;
-  border-radius:50px;
-  box-shadow:0 4px 12px rgba(0,0,0,0.20);
+  border-radius:30px;
+  box-shadow:0 4px 18px rgba(20,40,80,0.16);
   transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    background-color 0.2s ease;
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    background-color 0.25s ease,
+    border-color 0.25s ease;
 }
-
 .message-btn:hover{
-  transform:scale(1.05);
-  box-shadow:0 8px 20px rgba(0,0,0,0.30);
+  background:rgba(255,255,255,0.20);
+  border-color:rgba(255,255,255,0.65);
+  transform:translateY(-2px);
+  box-shadow:0 10px 26px rgba(20,40,80,0.22);
 }
-
 .message-btn:active{
-  transform:scale(0.95);
-  box-shadow:0 4px 12px rgba(0,0,0,0.15);
+  transform:translateY(0) scale(0.97);
+  box-shadow:0 4px 12px rgba(20,40,80,0.15);
+}
+.message-btn svg{
+  width:15px;
+  height:15px;
+  opacity:0.85;
 }
 
 .next-wrapper{
@@ -116,92 +172,129 @@ h1{
   height:100%;
   justify-content:center;
   align-items:center;
+  padding:0 24px;
+  box-sizing:border-box;
 }
-
+.next-eyebrow{
+  font-family:'Inter', sans-serif;
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:3.5px;
+  text-transform:uppercase;
+  color:rgba(255,255,255,0.62);
+  margin-bottom:16px;
+  opacity:0;
+  animation:fadeUp 0.8s ease forwards;
+  animation-delay:0.05s;
+}
 .next-title{
-  position:absolute;
-  top:60px;
-  font-size:36px;
-  font-weight:bold;
+  font-family:'Source Serif 4', Georgia, serif;
+  font-style:italic;
+  font-weight:500;
+  font-size:38px;
+  color:#ffffff;
+  margin:0 0 48px 0;
   opacity:0;
   animation:fadeUp 0.8s ease forwards;
-  animation-delay:0.1s;
+  animation-delay:0.12s;
+}
+.next-divider{
+  width:1px;
+  height:48px;
+  background:linear-gradient(to bottom, transparent, rgba(255,255,255,0.45), transparent);
+  margin:0 0 44px 0;
+  opacity:0;
+  animation:fadeUp 0.8s ease forwards;
+  animation-delay:0.18s;
 }
 
-.next-content{
+.action-list{
   display:flex;
-  flex-direction:row;
-  gap:40px;
+  flex-direction:column;
+  align-items:stretch;
+  width:100%;
+  max-width:380px;
+}
+.action-row{
+  display:flex;
   align-items:center;
-  justify-content:center;
-}
-
-.chat-btn{
-  display:inline-block;
-  color:white;
-  background-color:#90caf8;
-  padding:16px 42px;
-  font-size:20px;
-  font-weight:bold;
+  justify-content:space-between;
+  padding:22px 4px;
+  border-top:1px solid rgba(255,255,255,0.22);
   text-decoration:none;
-  border-radius:50px;
-  box-shadow:0 4px 12px rgba(0,0,0,0.20);
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    background-color 0.2s ease;
-}
-
-.chat-btn:hover{
-  transform:scale(1.05);
-  box-shadow:0 8px 20px rgba(0,0,0,0.30);
-}
-
-.chat-btn:active{
-  transform:scale(0.95);
-  box-shadow:0 4px 12px rgba(0,0,0,0.15);
-}
-
-.developing-text{
+  color:#ffffff;
   opacity:0;
-  animation:fadeUp 0.8s ease forwards;
-  animation-delay:0.3s;
+  animation:fadeUp 0.7s ease forwards;
+  transition:padding-left 0.3s ease, opacity 0.3s ease;
 }
+.action-row:last-child{
+  border-bottom:1px solid rgba(255,255,255,0.22);
+}
+.action-row.is-link{
+  cursor:pointer;
+}
+.action-row.is-link:hover{
+  padding-left:14px;
+}
+.action-row.is-link:hover .action-arrow{
+  transform:translateX(4px);
+  opacity:1;
+}
+.action-row.is-disabled{
+  color:rgba(255,255,255,0.5);
+  cursor:default;
+}
+.action-label{
+  display:flex;
+  align-items:baseline;
+  gap:14px;
+  font-family:'Inter', sans-serif;
+  font-size:18px;
+  font-weight:500;
+  letter-spacing:0.2px;
+}
+.action-num{
+  font-family:'Source Serif 4', Georgia, serif;
+  font-style:italic;
+  font-size:14px;
+  color:rgba(255,255,255,0.5);
+}
+.action-status{
+  font-size:12px;
+  font-weight:500;
+  letter-spacing:0.5px;
+  color:rgba(255,255,255,0.45);
+  text-transform:uppercase;
+}
+.action-arrow{
+  display:flex;
+  opacity:0.75;
+  transition:transform 0.3s ease, opacity 0.3s ease;
+}
+.action-arrow svg{
+  width:16px;
+  height:16px;
+}
+
+.row-1{ animation-delay:0.26s; }
+.row-2{ animation-delay:0.34s; }
 
 @keyframes fadeButton{
-  from{
-    opacity:0;
-    transform:translateY(15px);
-  }
-  to{
-    opacity:1;
-    transform:translateY(0);
-  }
+  from{ opacity:0; transform:translateY(15px); }
+  to{ opacity:1; transform:translateY(0); }
 }
 @keyframes fadeIn{
-  from{
-    opacity:0;
-    transform:translateY(8px);
-  }
-  to{
-    opacity:1;
-    transform:translateY(0);
-  }
+  from{ opacity:0; transform:translateY(8px); }
+  to{ opacity:1; transform:translateY(0); }
 }
 @keyframes fadeUp{
-  from{
-    opacity:0;
-    transform:translateY(20px);
-  }
-  to{
-    opacity:1;
-    transform:translateY(0);
-  }
+  from{ opacity:0; transform:translateY(20px); }
+  to{ opacity:1; transform:translateY(0); }
 }
 
 .scroll-down-wrap{
   position:absolute;
-  bottom:30px;
+  bottom:34px;
   left:0;
   width:100%;
   display:flex;
@@ -217,7 +310,7 @@ h1{
   flex-direction:column;
   justify-content:center;
   align-items:center;
-  color:white;
+  color:rgba(255,255,255,0.85);
   opacity:0;
   animation:fadeUp 0.8s ease forwards;
   animation-delay:0.6s;
@@ -233,20 +326,28 @@ h1{
   animation-delay:1.4s;
 }
 .scroll-down svg{
-  width:28px;
-  height:28px;
+  width:26px;
+  height:26px;
 }
 .section.intro.active .scroll-down{
   opacity:0 !important;
   pointer-events:none;
 }
 @keyframes bounce{
-  0%,100%{
-    transform:translateY(0);
-  }
-  50%{
-    transform:translateY(10px);
-  }
+  0%,100%{ transform:translateY(0); }
+  50%{ transform:translateY(10px); }
+}
+
+@media (max-width:480px){
+  h1{ font-size:27px; }
+  .next-title{ font-size:30px; }
+  .action-label{ font-size:16px; }
+  .message-wrap{ top:18px; right:18px; }
+  .message-btn{ padding:9px 20px; font-size:13px; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration:0.01ms !important; transition-duration:0.01ms !important; }
 }
 </style>
 </head>
@@ -254,13 +355,18 @@ h1{
 
 <div class="section intro" id="intro-section">
   <div class="message-wrap">
-    <a href="message.html" class="message-btn">Leave me a message</a>
+    <a href="message.html" class="message-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"></path></svg>
+      Leave me a message
+    </a>
   </div>
   <div class="card">
-    <a href="about.html">
+    <span class="eyebrow">Welcome</span>
+    <a href="about.html" class="avatar-link">
+      <span class="avatar-ring"></span>
       <img src="avatar.jpg" alt="avatar">
     </a>
-    <h1>Hi I'm Weiwenjun</h1>
+    <h1>Hi, I'm Weiwenjun</h1>
   </div>
   <div class="scroll-down-wrap">
     <button class="scroll-down" onclick="goToNext()" aria-label="向下滚动">
@@ -275,11 +381,25 @@ h1{
 
 <div class="section next" id="next-section">
   <div class="next-wrapper">
-    <div class="next-title">一些好玩的</div>
-    <div class="next-content">
-      <a href="chat/login.html" class="chat-btn">聊天室</a>
-      <div class="developing-text">
-        <h1>更多功能开发中...</h1>
+    <span class="next-eyebrow">Explore</span>
+    <h1 class="next-title">一些好玩的</h1>
+    <div class="next-divider"></div>
+    <div class="action-list">
+      <a href="chat/login.html" class="action-row is-link row-1">
+        <span class="action-label">
+          <span class="action-num">01</span>
+          聊天室
+        </span>
+        <span class="action-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        </span>
+      </a>
+      <div class="action-row is-disabled row-2">
+        <span class="action-label">
+          <span class="action-num">02</span>
+          更多功能
+        </span>
+        <span class="action-status">敬请期待</span>
       </div>
     </div>
   </div>
@@ -335,7 +455,7 @@ window.addEventListener('touchend', function(e){
 
 window.addEventListener('keydown', e => {
     if (isAnimating) return;
-    
+
     if (e.key === 'ArrowDown') {
         e.preventDefault();
         goToNext();
