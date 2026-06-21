@@ -27,7 +27,6 @@ export default {
       return jsonResponse(405, { error: "Method Not Allowed" });
     }
 
-
     const ip = request.headers.get("x-real-ip") || request.headers.get("x-forwarded-for") || "unknown";
     const now = Date.now();
     const last = lastSubmitTime.get(ip);
@@ -65,7 +64,7 @@ export default {
 
     const payload = JSON.stringify({
       title: `💬 ${name}`,
-      body: message,
+      body: `Email: ${email}\n\n${message}`,
     });
 
     try {
