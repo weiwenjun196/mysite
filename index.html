@@ -19,6 +19,7 @@ body{
 .section{
   position:fixed;
   left:0;
+  top:0;
   width:100%;
   height:100vh;
   display:flex;
@@ -26,29 +27,11 @@ body{
   align-items:center;
   text-align:center;
   overflow:hidden;
-  transition:transform 0.85s cubic-bezier(0.65,0,0.35,1);
 }
 .section.intro{
   background:
     radial-gradient(circle at 20% 15%, rgba(255,255,255,0.16), transparent 55%),
     linear-gradient(165deg, #5e93e8 0%, #6fa3ee 38%, #8cbcf2 75%, #aed0f5 100%);
-  top:0;
-  transform:translateY(0);
-  z-index:1;
-}
-.section.intro.active{
-  transform:translateY(-100vh);
-}
-.section.next{
-  background:
-    radial-gradient(circle at 80% 85%, rgba(255,255,255,0.14), transparent 55%),
-    linear-gradient(165deg, #4d80d6 0%, #5e93e8 45%, #7badec 100%);
-  top:100vh;
-  transform:translateY(0);
-  z-index:1;
-}
-.section.next.active{
-  transform:translateY(-100vh);
 }
 
 .card{
@@ -166,66 +149,30 @@ h1{
   opacity:0.85;
 }
 
-.next-wrapper{
-  display:flex;
-  flex-direction:column;
-  width:100%;
-  height:100%;
-  justify-content:center;
-  align-items:center;
-  padding:0 24px;
-  box-sizing:border-box;
-}
-.next-eyebrow{
-  font-family:'Inter', sans-serif;
-  font-size:12px;
-  font-weight:600;
-  letter-spacing:3.5px;
-  text-transform:uppercase;
-  color:rgba(255,255,255,0.62);
-  margin-bottom:16px;
+.nav-menu{
+  position:fixed;
+  top:26px;
+  left:28px;
+  z-index:3;
+  width:200px;
   opacity:0;
-  animation:fadeUp 0.8s ease forwards;
-  animation-delay:0.05s;
+  animation:fadeButton 0.8s ease forwards;
+  animation-delay:0.45s;
 }
-.next-title{
-  font-family:'Source Serif 4', Georgia, serif;
-  font-style:italic;
-  font-weight:500;
-  font-size:38px;
-  color:#ffffff;
-  margin:0 0 48px 0;
-  opacity:0;
-  animation:fadeUp 0.8s ease forwards;
-  animation-delay:0.12s;
-}
-.next-divider{
-  width:1px;
-  height:48px;
-  background:linear-gradient(to bottom, transparent, rgba(255,255,255,0.45), transparent);
-  margin:0 0 44px 0;
-  opacity:0;
-  animation:fadeUp 0.8s ease forwards;
-  animation-delay:0.18s;
-}
-
 .action-list{
   display:flex;
   flex-direction:column;
   align-items:stretch;
   width:100%;
-  max-width:380px;
 }
 .action-row{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  padding:22px 4px;
+  padding:14px 4px;
   border-top:1px solid rgba(255,255,255,0.22);
   text-decoration:none;
   color:#ffffff;
-  opacity:0;
-  animation:fadeUp 0.7s ease forwards;
   transition:padding-left 0.3s ease, opacity 0.3s ease;
 }
 .action-row:last-child{
@@ -248,20 +195,20 @@ h1{
 .action-label{
   display:flex;
   align-items:baseline;
-  gap:14px;
+  gap:12px;
   font-family:'Inter', sans-serif;
-  font-size:18px;
+  font-size:15px;
   font-weight:500;
   letter-spacing:0.2px;
 }
 .action-num{
   font-family:'Source Serif 4', Georgia, serif;
   font-style:italic;
-  font-size:14px;
+  font-size:12px;
   color:rgba(255,255,255,0.5);
 }
 .action-status{
-  font-size:12px;
+  font-size:11px;
   font-weight:500;
   letter-spacing:0.5px;
   color:rgba(255,255,255,0.45);
@@ -273,12 +220,9 @@ h1{
   transition:transform 0.3s ease, opacity 0.3s ease;
 }
 .action-arrow svg{
-  width:16px;
-  height:16px;
+  width:14px;
+  height:14px;
 }
-
-.row-1{ animation-delay:0.26s; }
-.row-2{ animation-delay:0.34s; }
 
 @keyframes fadeButton{
   from{ opacity:0; transform:translateY(15px); }
@@ -293,58 +237,12 @@ h1{
   to{ opacity:1; transform:translateY(0); }
 }
 
-.scroll-down-wrap{
-  position:absolute;
-  bottom:34px;
-  left:0;
-  width:100%;
-  display:flex;
-  justify-content:center;
-}
-.scroll-down{
-  cursor:pointer;
-  background:none;
-  border:none;
-  margin:0;
-  padding:10px;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  color:rgba(255,255,255,0.85);
-  opacity:0;
-  animation:fadeUp 0.8s ease forwards;
-  animation-delay:0.6s;
-  transition:opacity 0.4s ease;
-  -webkit-appearance:none;
-  appearance:none;
-}
-.scroll-down .arrow-icon{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  animation:bounce 2s ease-in-out infinite;
-  animation-delay:1.4s;
-}
-.scroll-down svg{
-  width:26px;
-  height:26px;
-}
-.section.intro.active .scroll-down{
-  opacity:0 !important;
-  pointer-events:none;
-}
-@keyframes bounce{
-  0%,100%{ transform:translateY(0); }
-  50%{ transform:translateY(10px); }
-}
-
 @media (max-width:480px){
   h1{ font-size:27px; }
-  .next-title{ font-size:30px; }
-  .action-label{ font-size:16px; }
   .message-wrap{ top:18px; right:18px; }
   .message-btn{ padding:9px 20px; font-size:13px; }
+  .nav-menu{ top:18px; left:18px; width:168px; }
+  .action-label{ font-size:14px; }
 }
 
 @media (prefers-reduced-motion: reduce){
@@ -354,7 +252,28 @@ h1{
 </head>
 <body>
 
-<div class="section intro" id="intro-section">
+<div class="section intro">
+  <nav class="nav-menu">
+    <div class="action-list">
+      <div class="action-row is-disabled">
+        <span class="action-label">
+          <span class="action-num">01</span>
+          主页
+        </span>
+        <span class="action-status">当前</span>
+      </div>
+      <a href="explore.html" class="action-row is-link">
+        <span class="action-label">
+          <span class="action-num">02</span>
+          一些项目
+        </span>
+        <span class="action-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        </span>
+      </a>
+    </div>
+  </nav>
+
   <div class="message-wrap">
     <a href="message.html" class="message-btn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"></path></svg>
@@ -369,103 +288,7 @@ h1{
     </a>
     <h1>Hi, I'm Weiwenjun</h1>
   </div>
-  <div class="scroll-down-wrap">
-    <button class="scroll-down" onclick="goToNext()" aria-label="向下滚动">
-      <span class="arrow-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </span>
-    </button>
-  </div>
 </div>
 
-<div class="section next" id="next-section">
-  <div class="next-wrapper">
-    <span class="next-eyebrow">Explore</span>
-    <h1 class="next-title">一些好玩的</h1>
-    <div class="next-divider"></div>
-    <div class="action-list">
-      <a href="chat/login.html" class="action-row is-link row-1">
-        <span class="action-label">
-          <span class="action-num">01</span>
-          聊天室
-        </span>
-        <span class="action-arrow">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-        </span>
-      </a>
-      <div class="action-row is-disabled row-2">
-        <span class="action-label">
-          <span class="action-num">02</span>
-          更多功能
-        </span>
-        <span class="action-status">敬请期待</span>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-let isActive = false;
-let isAnimating = false;
-const introEl = document.getElementById('intro-section');
-const nextEl = document.getElementById('next-section');
-
-function goToNext(){
-  if(isAnimating || isActive) return;
-  isAnimating = true;
-  isActive = true;
-  introEl.classList.add('active');
-  nextEl.classList.add('active');
-  setTimeout(()=>{ isAnimating = false; }, 800);
-}
-
-function goToPrev(){
-  if(isAnimating || !isActive) return;
-  isAnimating = true;
-  isActive = false;
-  introEl.classList.remove('active');
-  nextEl.classList.remove('active');
-  setTimeout(()=>{ isAnimating = false; }, 800);
-}
-
-window.addEventListener('wheel', function(e){
-  if(e.deltaY > 0){
-    goToNext();
-  } else if(e.deltaY < 0){
-    goToPrev();
-  }
-}, {passive:true});
-
-let touchStartY = 0;
-window.addEventListener('touchstart', function(e){
-  touchStartY = e.touches[0].clientY;
-}, {passive:true});
-
-window.addEventListener('touchend', function(e){
-  const touchEndY = e.changedTouches[0].clientY;
-  const diff = touchStartY - touchEndY;
-  if(Math.abs(diff) < 30) return;
-  if(diff > 0){
-    goToNext();
-  } else {
-    goToPrev();
-  }
-}, {passive:true});
-
-window.addEventListener('keydown', e => {
-    if (isAnimating) return;
-
-    if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        goToNext();
-    } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        goToPrev();
-    }
-});
-
-</script>
 </body>
 </html>
