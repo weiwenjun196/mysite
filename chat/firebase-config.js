@@ -9,4 +9,4 @@ const firebaseConfig = {
   measurementId: "G-S8DKWQFMJF"
 };
 
-const ALL_USERS = ["bob", "admin", "shlsir","littleyellow"];
+const ALL_USERS = ["admin", "shlsir","littleyellow","05"];
